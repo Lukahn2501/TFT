@@ -1,207 +1,134 @@
-# TFT Data Analysis
+# TFT Data API
 
-This repository contains localized game data for **Teamfight Tactics (TFT)**, Riot Games' auto-battler game mode.
+> A modern REST API for Teamfight Tactics game data, powered by .NET 10 and PostgreSQL.
 
-## Data Files
+## Overview
 
-- `en_us.json` - English (US) localization (~25MB)
-- `fr_fr.json` - French (France) localization
+This project provides a comprehensive backend service for fetching, parsing, and serving Teamfight Tactics game data from [Community Dragon](https://raw.communitydragon.org/). Built with .NET 10, it offers a clean REST API with interactive documentation via Scalar UI.
 
----
+## Features
 
-## en_us.json Structure
+✨ **Comprehensive Data Coverage**
+- 3,500+ champions across all game modes
+- 2,000+ traits and synergies
+- 1,900+ augments (Silver, Gold, Prismatic)
+- 1,500+ items (craftable, consumables, emblems)
+- 41 set variants (Standard, Hyper Roll, Double Up, etc.)
 
-The JSON file contains three main top-level keys:
+🚀 **Modern Architecture**
+- .NET 10 with minimal API design
+- Entity Framework Core for data access
+- PostgreSQL database with optimized schema
+- Docker containerization for easy deployment
+- Beautiful API documentation with Scalar UI
 
-### 1. `items` (3,415 entries)
+🎯 **Developer Experience**
+- Interactive API explorer at `/scalar/v1`
+- OpenAPI specification at `/openapi/v1.json`
+- Comprehensive filtering and querying
+- CORS enabled for frontend integration
 
-Contains all game items including:
+## Quick Start
 
-| Category | Count | Description |
-|----------|-------|-------------|
-| **Augments** | ~1,663 | Special bonuses players can select during a match |
-| **Craftable Items** | ~334 | Items created by combining components |
-| **Champion Items** | ~101 | Unit-specific items |
-| **Consumables** | ~64 | One-time use items |
-| **Encounter Items** | ~73 | Items from special events |
-| **Assist/Support** | ~117 | Supporting game mechanics |
-| **Others** | Various | Set-specific mechanics, emblems, etc. |
+### Using Docker (Recommended)
 
-#### Item Structure
+```bash
+# Start everything (database + data loader + API)
+docker compose up -d
 
-```json
-{
-  "apiName": "TFT_Item_RabadonsDeathcap",
-  "name": "Rabadon's Deathcap",
-  "desc": "This humble hat can help you make, or unmake, the world itself.",
-  "icon": "ASSETS/Maps/TFT/Icons/Items/Hexcore/TFT_Item_RabadonsDeathcap.TFT_Set13.tex",
-  "composition": ["TFT_Item_NeedlesslyLargeRod", "TFT_Item_NeedlesslyLargeRod"],
-  "effects": {"AP": 50.0, "BonusDamage": 0.15},
-  "associatedTraits": [],
-  "incompatibleTraits": [],
-  "tags": [],
-  "unique": false
-}
+# API available at http://localhost:5000
+# Scalar UI at http://localhost:5000/scalar/v1
 ```
 
----
+### Local Development
 
-### 2. `sets` (11 sets)
+```bash
+# Start PostgreSQL
+docker compose -f docker-compose.dev.yml up -d
 
-A simplified mapping of TFT sets containing basic set information:
+# Load data from Community Dragon
+cd src/TFT.DataLoader && dotnet run
 
-| Set # | Name |
-|-------|------|
-| 1 | TutorialV2 |
-| 3 | Galaxies |
-| 4 | Fates II |
-| 5 | Set 5 |
-| 7 | Set7 |
-| 10 | Set10 |
-| 12 | Set12 |
-| 13 | Set13 |
-| 14 | Set14 |
-| 15 | Set15 |
-| 16 | Set16 |
-
-Each set contains:
-- `name` - Set display name
-- `champions` - List of champions
-- `traits` - List of traits
-
----
-
-### 3. `setData` (41 game mode variants)
-
-Detailed set data organized by **game mode mutators**. Each set can have multiple variants:
-
-| Mode Suffix | Description |
-|-------------|-------------|
-| `TFTSetX` | Standard ranked/normal mode |
-| `TFTSetX_TURBO` | Hyper Roll mode |
-| `TFTSetX_PAIRS` | Double Up mode |
-| `TFTSetX_PVEMODE` | PvE encounters |
-| `TFTSetX_Evolved` | Mid-set update variant |
-| `TFTSetX_CarouselOfChaos` | Special game mode |
-
-#### Champion Structure
-
-```json
-{
-  "apiName": "TFT13_Singed",
-  "characterName": "TFT13_Singed",
-  "name": "Singed",
-  "cost": 1,
-  "role": "APTank",
-  "traits": ["Chem-Baron", "Sentinel"],
-  "icon": "...",
-  "squareIcon": "...",
-  "tileIcon": "...",
-  "ability": {
-    "name": "Dangerous Mutations",
-    "desc": "Gain Durability and grant allies...",
-    "icon": "...",
-    "variables": [
-      {"name": "AttackSpeed", "value": [1.0, 100.0, 115.0, 130.0, 150.0, 1.0, 1.0]},
-      {"name": "Duration", "value": [4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0]}
-    ]
-  },
-  "stats": {
-    "armor": 40.0,
-    "attackSpeed": 0.6,
-    "critChance": 0.25,
-    "critMultiplier": 1.4,
-    "damage": 55.0,
-    "hp": 650.0,
-    "initialMana": 0,
-    "magicResist": 40.0,
-    "mana": 50.0,
-    "range": 1.0
-  }
-}
+# Run API
+cd src/TFT.Api && dotnet run
 ```
 
-**Note:** The `variables` array in abilities uses star-level indexing (0=base, 1=1-star, 2=2-star, 3=3-star, 4=3-star+, etc.)
+## API Endpoints
 
-#### Trait Structure
+| Endpoint | Description | Example |
+|----------|-------------|---------|
+| `GET /api/champions` | List all champions | `?trait=Ambusher&cost=3` |
+| `GET /api/champions/{name}` | Get champion details | `/api/champions/Jinx` |
+| `GET /api/compositions/{trait}` | Get team composition | `/api/compositions/Automata` |
+| `GET /api/traits` | List all traits | `?set=TFTSet13` |
+| `GET /api/items` | List all items | - |
+| `GET /api/augments` | List augments | `?tier=3&trait=Automata` |
+| `GET /api/sets` | List all TFT sets | - |
 
-```json
-{
-  "apiName": "TFT13_Hextech",
-  "name": "Automata",
-  "desc": "Automata gain a crystal when they deal damage...",
-  "icon": "ASSETS/UX/TraitIcons/Trait_Icon_13_Automata.TFT_Set13.tex",
-  "effects": [
-    {
-      "minUnits": 2,
-      "maxUnits": 3,
-      "style": 1,
-      "variables": {
-        "MagicDamage": 150.0,
-        "Resists": 25.0,
-        "TriggerNumCrystals": 20.0
-      }
-    },
-    {
-      "minUnits": 4,
-      "maxUnits": 5,
-      "style": 3,
-      "variables": {
-        "MagicDamage": 450.0,
-        "Resists": 60.0
-      }
-    }
-  ]
-}
+## Technology Stack
+
+- **.NET 10** - Modern C# framework
+- **ASP.NET Core** - Minimal API
+- **Entity Framework Core 10** - ORM
+- **PostgreSQL 15** - Relational database
+- **Scalar** - Beautiful API documentation
+- **Docker** - Containerization
+
+## Project Structure
+
+```
+TFT/
+├── src/
+│   ├── TFT.Core/              # Domain models & DTOs
+│   ├── TFT.Infrastructure/    # EF Core & database
+│   ├── TFT.DataLoader/        # Data fetching console app
+│   └── TFT.Api/               # REST API
+├── docker-compose.yml         # Full orchestration
+├── docker-compose.dev.yml     # PostgreSQL only
+└── Makefile                   # Convenience commands
 ```
 
-**Trait Effect Styles:**
-- `style: 1` - Bronze tier
-- `style: 3` - Silver tier  
-- `style: 5` - Gold tier
-- Higher values = more powerful breakpoints
+## Data Source
+
+Data is sourced from **Community Dragon** - the community-driven League of Legends and TFT data project:
+- Base URL: `https://raw.communitydragon.org/pbe/cdragon/tft/`
+- Format: JSON (~25MB per language)
+- Languages: `en_us`, `fr_fr`, and more
+
+## Documentation
+
+For detailed information about:
+- Data structure and schema → See `DOCUMENTATION.md`
+- API usage and examples → Visit `/scalar/v1` when running
+- Docker deployment → See `docker-compose.yml`
+- Development setup → See commands below
+
+## Makefile Commands
+
+```bash
+make help        # Show all available commands
+make dev-up      # Start PostgreSQL for local dev
+make run-loader  # Fetch and load data
+make run-api     # Run API locally
+make up          # Start all services
+make down        # Stop all services
+make logs        # View logs
+make clean       # Clean everything
+```
+
+## Future Roadmap
+
+- [ ] React frontend with team builder
+- [ ] AI-powered composition recommendations
+- [ ] Redis caching layer
+- [ ] Automated updates on patch days
+- [ ] Meta analytics and statistics
+- [ ] Multi-language support
+
+## License
+
+MIT
 
 ---
 
-## Summary Statistics
-
-| Metric | Count |
-|--------|-------|
-| Total Items | 3,415 |
-| Total Set Variants | 41 |
-| Unique Sets | 11 |
-| Champion Entries (all variants) | 3,527 |
-| Trait Entries (all variants) | 2,028 |
-| Unique Items | 528 |
-| Items with Effects | 2,200 |
-| Items with Associated Traits | 851 |
-
----
-
-## Use Cases
-
-This data can be used for:
-- Building TFT companion apps
-- Creating team composition tools
-- Analyzing game balance and statistics
-- Building item recommendation systems
-- Creating educational resources for new players
-- Developing strategy guides
-
----
-
-## Augment Tiers
-
-Augments are identified by their icon path naming convention:
-- **Silver (Tier 1)**: `_I.TFT_SetX`
-- **Gold (Tier 2)**: `_II.TFT_SetX`
-- **Prismatic (Tier 3)**: `_III.TFT_SetX`
-
----
-
-## Notes
-
-- API names use the format `TFT{SetNumber}_{Type}_{Name}`
-- Descriptions may contain HTML-like formatting tags (e.g., `<TFTBonus>`, `<magicDamage>`)
-- Some values use placeholder patterns like `@VariableName@` for dynamic text substitution
-- Trait styles correlate with visual tier representation in-game
+**Built with ❤️ for the TFT community**
