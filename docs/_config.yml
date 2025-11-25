@@ -1,0 +1,28 @@
+title: TFT Data API Documentation
+description: A modern REST API for Teamfight Tactics game data, powered by .NET 10 and PostgreSQL.
+theme: jekyll-theme-minimal
+baseurl: "/TFT"
+url: "https://lukahn2501.github.io"
+
+# Exclude files from build
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+
+# Enable GitHub Pages plugins
+plugins:
+  - jekyll-relative-links
+  - jekyll-seo-tag
+
+# Navigation
+nav:
+  - title: Home
+    url: /
+  - title: API Reference
+    url: /api-reference
+  - title: Database Schema
+    url: /database-schema
+  - title: Development Guide
+    url: /development-guide

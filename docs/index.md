@@ -1,3 +1,9 @@
+---
+layout: default
+title: Home
+nav_order: 1
+---
+
 # TFT Data API
 
 > A modern REST API for Teamfight Tactics game data, powered by .NET 10 and PostgreSQL.
@@ -53,26 +59,22 @@ cd src/TFT.DataLoader && dotnet run
 cd src/TFT.Api && dotnet run
 ```
 
-## API Endpoints
+## Documentation Sections
 
-| Endpoint | Description | Example |
-|----------|-------------|---------|
-| `GET /api/champions` | List all champions | `?trait=Ambusher&cost=3` |
-| `GET /api/champions/{name}` | Get champion details | `/api/champions/Jinx` |
-| `GET /api/compositions/{trait}` | Get team composition | `/api/compositions/Automata` |
-| `GET /api/traits` | List all traits | `?set=TFTSet13` |
-| `GET /api/items` | List all items | - |
-| `GET /api/augments` | List augments | `?tier=3&trait=Automata` |
-| `GET /api/sets` | List all TFT sets | - |
+- [API Reference](api-reference.md) - Complete API endpoint documentation
+- [Database Schema](database-schema.md) - Database structure and relationships
+- [Development Guide](development-guide.md) - Setup and contribution guidelines
 
 ## Technology Stack
 
-- **.NET 10** - Modern C# framework
-- **ASP.NET Core** - Minimal API
-- **Entity Framework Core 10** - ORM
-- **PostgreSQL 15** - Relational database
-- **Scalar** - Beautiful API documentation
-- **Docker** - Containerization
+| Technology | Purpose |
+|------------|---------|
+| .NET 10 | Modern C# framework |
+| ASP.NET Core | Minimal API |
+| Entity Framework Core 10 | ORM |
+| PostgreSQL 15 | Relational database |
+| Scalar | Beautiful API documentation |
+| Docker | Containerization |
 
 ## Project Structure
 
@@ -83,6 +85,7 @@ TFT/
 │   ├── TFT.Infrastructure/    # EF Core & database
 │   ├── TFT.DataLoader/        # Data fetching console app
 │   └── TFT.Api/               # REST API
+├── docs/                      # Documentation (you are here)
 ├── docker-compose.yml         # Full orchestration
 ├── docker-compose.dev.yml     # PostgreSQL only
 └── Makefile                   # Convenience commands
@@ -94,38 +97,6 @@ Data is sourced from **Community Dragon** - the community-driven League of Legen
 - Base URL: `https://raw.communitydragon.org/pbe/cdragon/tft/`
 - Format: JSON (~25MB per language)
 - Languages: `en_us`, `fr_fr`, and more
-
-## Documentation
-
-📖 **[View Full Documentation](https://lukahn2501.github.io/TFT/)**
-
-For detailed information about:
-- Data structure and schema → See [Database Schema](https://lukahn2501.github.io/TFT/database-schema) or `DOCUMENTATION.md`
-- API usage and examples → See [API Reference](https://lukahn2501.github.io/TFT/api-reference) or visit `/scalar/v1` when running
-- Development setup → See [Development Guide](https://lukahn2501.github.io/TFT/development-guide)
-- Docker deployment → See `docker-compose.yml`
-
-## Makefile Commands
-
-```bash
-make help        # Show all available commands
-make dev-up      # Start PostgreSQL for local dev
-make run-loader  # Fetch and load data
-make run-api     # Run API locally
-make up          # Start all services
-make down        # Stop all services
-make logs        # View logs
-make clean       # Clean everything
-```
-
-## Future Roadmap
-
-- [ ] React frontend with team builder
-- [ ] AI-powered composition recommendations
-- [ ] Redis caching layer
-- [ ] Automated updates on patch days
-- [ ] Meta analytics and statistics
-- [ ] Multi-language support
 
 ## License
 
