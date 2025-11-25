@@ -81,7 +81,7 @@ public class DataLoaderService
 
                     augments.Add(new Augment
                     {
-                        ApiName = dto.ApiName,
+                        ApiName = dto.ApiName ?? string.Empty,
                         Name = dto.Name,
                         Description = dto.Desc,
                         Icon = dto.Icon,
@@ -101,7 +101,7 @@ public class DataLoaderService
                 {
                     items.Add(new Item
                     {
-                        ApiName = dto.ApiName,
+                        ApiName = dto.ApiName ?? string.Empty,
                         Name = dto.Name,
                         Description = dto.Desc,
                         Icon = dto.Icon,
