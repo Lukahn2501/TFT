@@ -194,7 +194,7 @@ This data can be used for:
 
 Augments are identified by their icon path naming convention:
 - **Silver (Tier 1)**: `_I.TFT_SetX`
-- **Gold (Tier 2)**: `_II.TFT_SetX`  
+- **Gold (Tier 2)**: `_II.TFT_SetX`
 - **Prismatic (Tier 3)**: `_III.TFT_SetX`
 
 ---
