@@ -7,7 +7,7 @@ public class ChampionTrait
 {
     public int ChampionId { get; set; }
     public Champion Champion { get; set; } = null!;
-    
+
     public int TraitId { get; set; }
     public Trait Trait { get; set; } = null!;
 }

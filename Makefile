@@ -42,5 +42,5 @@ run-api: ## Run API locally (requires PostgreSQL running)
 restore: ## Restore NuGet packages
 	dotnet restore
 
-test: ## Run tests (placeholder)
-	@echo "No tests defined yet"
+test: ## Run tests
+	dotnet test --verbosity normal

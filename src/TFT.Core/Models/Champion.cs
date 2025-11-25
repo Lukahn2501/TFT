@@ -11,11 +11,11 @@ public class Champion
     public string? Icon { get; set; }
     public string? SquareIcon { get; set; }
     public string? TileIcon { get; set; }
-    
+
     // Store complex JSON data as string
     public string? AbilityJson { get; set; }
     public string? StatsJson { get; set; }
-    
+
     // Navigation properties
     public int SetDataId { get; set; }
     public SetData SetData { get; set; } = null!;

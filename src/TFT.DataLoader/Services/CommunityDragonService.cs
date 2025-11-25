@@ -35,7 +35,7 @@ public class CommunityDragonService
             response.EnsureSuccessStatusCode();
 
             var json = await response.Content.ReadAsStringAsync(cancellationToken);
-            
+
             _logger.LogInformation("Downloaded {Size} bytes", json.Length);
 
             var options = new JsonSerializerOptions
@@ -45,7 +45,7 @@ public class CommunityDragonService
             };
 
             var data = JsonSerializer.Deserialize<TftDataDto>(json, options);
-            
+
             _logger.LogInformation("Parsed {ItemCount} items, {SetCount} sets, {SetDataCount} setData entries",
                 data?.Items.Count ?? 0,
                 data?.Sets.Count ?? 0,
