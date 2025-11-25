@@ -26,7 +26,7 @@ public class DataLoaderService
         await ClearExistingDataAsync(cancellationToken);
 
         // Load Items (these are global, not set-specific)
-        await LoadItemsAsync(data.Items, cancellationToken);
+        await LoadItemsAsync(data.Items, data.SetData, cancellationToken);
 
         // Load SetData with Champions and Traits
         await LoadSetDataAsync(data.SetData, cancellationToken);
@@ -50,9 +50,15 @@ public class DataLoaderService
         _logger.LogInformation("Existing data cleared");
     }
 
-    private async Task LoadItemsAsync(List<ItemDto> itemDtos, CancellationToken cancellationToken)
+    private async Task LoadItemsAsync(List<ItemDto> itemDtos, List<SetDataDto> setDataDtos, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Loading {Count} items...", itemDtos.Count);
+
+        // First, find the TFTSet16 setData to get the list of valid items and augments
+        var tftSet16Data = setDataDtos.FirstOrDefault(s => s.Mutator == "TFTSet16");
+        var validItemApiNames = tftSet16Data?.Items?.ToHashSet(StringComparer.OrdinalIgnoreCase) ?? new HashSet<string>();
+        var validAugmentApiNames = tftSet16Data?.Augments?.ToHashSet(StringComparer.OrdinalIgnoreCase) ?? new HashSet<string>();
+        _logger.LogInformation("Found {ItemCount} items and {AugmentCount} augments in TFTSet16 setData", validItemApiNames.Count, validAugmentApiNames.Count);
 
         var items = new List<Item>();
         var augments = new List<Augment>();
@@ -68,37 +74,45 @@ public class DataLoaderService
 
             if (isAugment)
             {
-                var tier = ExtractAugmentTier(dto.Icon);
-
-                augments.Add(new Augment
+                // Filter augments based on TFTSet16 setData augments list (same as items)
+                if (validAugmentApiNames.Contains(dto.ApiName ?? ""))
                 {
-                    ApiName = dto.ApiName,
-                    Name = dto.Name,
-                    Description = dto.Desc,
-                    Icon = dto.Icon,
-                    Tier = tier,
-                    IsUnique = dto.Unique,
-                    EffectsJson = dto.Effects != null ? JsonSerializer.Serialize(dto.Effects) : null,
-                    AssociatedTraitsJson = dto.AssociatedTraits != null ? JsonSerializer.Serialize(dto.AssociatedTraits) : null,
-                    IncompatibleTraitsJson = dto.IncompatibleTraits != null ? JsonSerializer.Serialize(dto.IncompatibleTraits) : null,
-                    TagsJson = dto.Tags != null ? JsonSerializer.Serialize(dto.Tags) : null
-                });
+                    var tier = ExtractAugmentTier(dto.Icon);
+
+                    augments.Add(new Augment
+                    {
+                        ApiName = dto.ApiName,
+                        Name = dto.Name,
+                        Description = dto.Desc,
+                        Icon = dto.Icon,
+                        Tier = tier,
+                        IsUnique = dto.Unique,
+                        EffectsJson = dto.Effects != null ? JsonSerializer.Serialize(dto.Effects) : null,
+                        AssociatedTraitsJson = dto.AssociatedTraits != null ? JsonSerializer.Serialize(dto.AssociatedTraits) : null,
+                        IncompatibleTraitsJson = dto.IncompatibleTraits != null ? JsonSerializer.Serialize(dto.IncompatibleTraits) : null,
+                        TagsJson = dto.Tags != null ? JsonSerializer.Serialize(dto.Tags) : null
+                    });
+                }
             }
             else
             {
-                items.Add(new Item
+                // Filter items based on TFTSet16 setData items list
+                if (validItemApiNames.Contains(dto.ApiName ?? ""))
                 {
-                    ApiName = dto.ApiName,
-                    Name = dto.Name,
-                    Description = dto.Desc,
-                    Icon = dto.Icon,
-                    IsUnique = dto.Unique,
-                    CompositionJson = dto.Composition != null ? JsonSerializer.Serialize(dto.Composition) : null,
-                    EffectsJson = dto.Effects != null ? JsonSerializer.Serialize(dto.Effects) : null,
-                    AssociatedTraitsJson = dto.AssociatedTraits != null ? JsonSerializer.Serialize(dto.AssociatedTraits) : null,
-                    IncompatibleTraitsJson = dto.IncompatibleTraits != null ? JsonSerializer.Serialize(dto.IncompatibleTraits) : null,
-                    TagsJson = dto.Tags != null ? JsonSerializer.Serialize(dto.Tags) : null
-                });
+                    items.Add(new Item
+                    {
+                        ApiName = dto.ApiName,
+                        Name = dto.Name,
+                        Description = dto.Desc,
+                        Icon = dto.Icon,
+                        IsUnique = dto.Unique,
+                        CompositionJson = dto.Composition != null ? JsonSerializer.Serialize(dto.Composition) : null,
+                        EffectsJson = dto.Effects != null ? JsonSerializer.Serialize(dto.Effects) : null,
+                        AssociatedTraitsJson = dto.AssociatedTraits != null ? JsonSerializer.Serialize(dto.AssociatedTraits) : null,
+                        IncompatibleTraitsJson = dto.IncompatibleTraits != null ? JsonSerializer.Serialize(dto.IncompatibleTraits) : null,
+                        TagsJson = dto.Tags != null ? JsonSerializer.Serialize(dto.Tags) : null
+                    });
+                }
             }
         }
 
@@ -113,29 +127,35 @@ public class DataLoaderService
     {
         _logger.LogInformation("Loading {Count} set data entries...", setDataDtos.Count);
 
-        foreach (var setDto in setDataDtos)
+        // Filter to only load TFTSet16
+        var tftSet16 = setDataDtos.FirstOrDefault(s => s.Mutator == "TFTSet16");
+
+        if (tftSet16 == null)
         {
-            _logger.LogInformation("Processing set: {SetName} ({Mutator})", setDto.Name, setDto.Mutator);
-
-            // Create SetData entity
-            var setData = new SetData
-            {
-                Name = setDto.Name,
-                Mutator = setDto.Mutator,
-                SetNumber = setDto.Number
-            };
-
-            await _context.SetData.AddAsync(setData, cancellationToken);
-            await _context.SaveChangesAsync(cancellationToken); // Save to get ID
-
-            // Load Traits for this set
-            var traitMap = await LoadTraitsAsync(setData.Id, setDto.Traits, cancellationToken);
-
-            // Load Champions for this set
-            await LoadChampionsAsync(setData.Id, setDto.Champions, traitMap, cancellationToken);
+            _logger.LogWarning("TFTSet16 not found in data source!");
+            return;
         }
 
-        _logger.LogInformation("All set data loaded");
+        _logger.LogInformation("Processing set: {SetName} ({Mutator})", tftSet16.Name, tftSet16.Mutator);
+
+        // Create SetData entity
+        var setData = new SetData
+        {
+            Name = tftSet16.Name,
+            Mutator = tftSet16.Mutator,
+            SetNumber = tftSet16.Number
+        };
+
+        await _context.SetData.AddAsync(setData, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken); // Save to get ID
+
+        // Load Traits for this set
+        var traitMap = await LoadTraitsAsync(setData.Id, tftSet16.Traits, cancellationToken);
+
+        // Load Champions for this set
+        await LoadChampionsAsync(setData.Id, tftSet16.Champions, traitMap, cancellationToken);
+
+        _logger.LogInformation("TFTSet16 data loaded successfully");
     }
 
     private async Task<Dictionary<string, Trait>> LoadTraitsAsync(
@@ -163,8 +183,8 @@ public class DataLoaderService
 
         _logger.LogInformation("Loaded {Count} traits for set {SetDataId}", traits.Count, setDataId);
 
-        // Return a map of ApiName -> Trait for lookups
-        return traits.ToDictionary(t => t.ApiName, t => t);
+        // Return a map of display Name -> Trait (champions use display names like "Yordle", not "TFT16_Yordle")
+        return traits.ToDictionary(t => t.Name, t => t);
     }
 
     private async Task LoadChampionsAsync(
