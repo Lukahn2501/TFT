@@ -78,6 +78,12 @@ public class SetDataDto
 
     [JsonPropertyName("traits")]
     public List<TraitDto> Traits { get; set; } = new();
+
+    [JsonPropertyName("items")]
+    public List<string> Items { get; set; } = new();
+
+    [JsonPropertyName("augments")]
+    public List<string> Augments { get; set; } = new();
 }
 
 public class ChampionDto
