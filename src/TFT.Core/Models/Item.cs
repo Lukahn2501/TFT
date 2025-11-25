@@ -8,7 +8,7 @@ public class Item
     public string? Description { get; set; }
     public string? Icon { get; set; }
     public bool IsUnique { get; set; }
-    
+
     // Store as JSON strings
     public string? CompositionJson { get; set; }
     public string? EffectsJson { get; set; }

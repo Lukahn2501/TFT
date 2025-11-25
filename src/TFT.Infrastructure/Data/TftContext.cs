@@ -26,7 +26,7 @@ public class TftContext : DbContext
             entity.HasKey(e => e.Id);
             entity.HasIndex(e => e.ApiName);
             entity.HasIndex(e => e.Cost);
-            
+
             entity.HasOne(e => e.SetData)
                 .WithMany(s => s.Champions)
                 .HasForeignKey(e => e.SetDataId)
@@ -39,7 +39,7 @@ public class TftContext : DbContext
             entity.HasKey(e => e.Id);
             entity.HasIndex(e => e.ApiName);
             entity.HasIndex(e => e.Name);
-            
+
             entity.HasOne(e => e.SetData)
                 .WithMany(s => s.Traits)
                 .HasForeignKey(e => e.SetDataId)
@@ -50,12 +50,12 @@ public class TftContext : DbContext
         modelBuilder.Entity<ChampionTrait>(entity =>
         {
             entity.HasKey(ct => new { ct.ChampionId, ct.TraitId });
-            
+
             entity.HasOne(ct => ct.Champion)
                 .WithMany(c => c.ChampionTraits)
                 .HasForeignKey(ct => ct.ChampionId)
                 .OnDelete(DeleteBehavior.Cascade);
-            
+
             entity.HasOne(ct => ct.Trait)
                 .WithMany(t => t.ChampionTraits)
                 .HasForeignKey(ct => ct.TraitId)

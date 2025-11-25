@@ -69,7 +69,7 @@ public class DataLoaderService
             if (isAugment)
             {
                 var tier = ExtractAugmentTier(dto.Icon);
-                
+
                 augments.Add(new Augment
                 {
                     ApiName = dto.ApiName,
@@ -207,7 +207,7 @@ public class DataLoaderService
         for (int i = 0; i < champions.Count; i++)
         {
             var champion = champions[i];
-            
+
             // Find the corresponding DTO by matching the ApiName
             var dto = championDtos.FirstOrDefault(d => d.ApiName == champion.ApiName);
             if (dto == null)
@@ -225,7 +225,7 @@ public class DataLoaderService
                 }
                 else
                 {
-                    _logger.LogWarning("Trait {TraitApiName} not found for champion {ChampionName}", 
+                    _logger.LogWarning("Trait {TraitApiName} not found for champion {ChampionName}",
                         traitApiName, champion.Name);
                 }
             }
@@ -248,7 +248,7 @@ public class DataLoaderService
             return 3; // Prismatic
         if (iconPath.Contains("_II.", StringComparison.OrdinalIgnoreCase))
             return 2; // Gold
-        
+
         return 1; // Silver (default)
     }
 }

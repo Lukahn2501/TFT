@@ -9,7 +9,7 @@ public class Augment
     public string? Icon { get; set; }
     public int Tier { get; set; } // 1=Silver, 2=Gold, 3=Prismatic
     public bool IsUnique { get; set; }
-    
+
     // Store as JSON strings
     public string? EffectsJson { get; set; }
     public string? AssociatedTraitsJson { get; set; }
