@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: tft-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: tft_data
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - tft-network
+
+  dataloader:
+    build:
+      context: .
+      dockerfile: src/TFT.DataLoader/Dockerfile
+    container_name: tft-dataloader
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=tft_data;Username=postgres;Password=postgres"
+      CommunityDragon__BaseUrl: "https://raw.communitydragon.org/pbe/cdragon/tft/"
+      CommunityDragon__Language: "en_us"
+    networks:
+      - tft-network
+    restart: "no"
+
+  api:
+    build:
+      context: .
+      dockerfile: src/TFT.Api/Dockerfile
+    container_name: tft-api
+    depends_on:
+      postgres:
+        condition: service_healthy
+      dataloader:
+        condition: service_completed_successfully
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: "http://+:8080"
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=tft_data;Username=postgres;Password=postgres"
+    ports:
+      - "5000:8080"
+    networks:
+      - tft-network
+    restart: unless-stopped
+
+networks:
+  tft-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
