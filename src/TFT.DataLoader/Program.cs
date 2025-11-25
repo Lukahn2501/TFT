@@ -16,6 +16,7 @@ class Program
             .ConfigureAppConfiguration((context, config) =>
             {
                 config.AddJsonFile("appsettings.json", optional: false);
+                config.AddEnvironmentVariables();
             })
             .ConfigureServices((context, services) =>
             {
