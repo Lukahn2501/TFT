@@ -1,5 +1,5 @@
 # Build stage
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
 # Copy solution and project files
@@ -23,11 +23,11 @@ FROM build AS publish
 RUN dotnet publish "TFT.DataLoader.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 # Runtime stage
-FROM mcr.microsoft.com/dotnet/runtime:8.0 AS final
+FROM mcr.microsoft.com/dotnet/runtime:10.0 AS final
 WORKDIR /app
 
 # Create non-root user
-RUN useradd -m -u 1000 tftuser && chown -R tftuser:tftuser /app
+RUN useradd -m tftuser || true && chown -R tftuser:tftuser /app
 USER tftuser
 
 COPY --from=publish /app/publish .
